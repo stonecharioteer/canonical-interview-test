@@ -42,16 +42,20 @@ class TestPackTest(unittest.TestCase):
                 found_udeb = url.endswith(f"udeb-{self.architecture}.gz")
         self.assertTrue(found_udeb, "the udeb file url was not returned.")
 
+
     def test_downloads_content_file(self):
         """the application can download the right contents file given an architecture
         string"""
-        from packstats.packstats import download_contents_file
+        from packstats.packstats import download_contents_file, get_contents_file_urls
+        urls = get_contents_file_urls("amd64")
 
         with tempfile.TemporaryDirectory() as temp_directory:
-            download_contents_file(arch=self.architecture, output_dir=temp_directory)
+            url = urls[0]
+            download_contents_file(content_file_url=url, output_dir=temp_directory)
             expected_file = pathlib.Path(temp_directory) / f"Contents-{self.architecture}"
-            self.assertTrue(expected_file.exists())
-            self.assertTrue(expected_file.is_file())
+            self.assertTrue(expected_file.exists(), "The requested contents index was not downloaded and unpacked")
+            self.assertTrue(expected_file.is_file(), "The requested contents index was not downloaded and unpacked to a file, it is a directory")
+
 
 
     def test_gets_package_data_from_contents(self):
