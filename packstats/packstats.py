@@ -34,12 +34,12 @@ def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/di
             filename = line[line.find("Contents-"):line.find(".gz")+3]
             url = f"{mirror_url}{filename}" if mirror_url.endswith(
                 "/") else f"{mirror_url}/{filename}"
-            arch = filename[filename.find("-"):filename.rfind(".gz")-1]
-            content_types.append(dict(filename=filename, url=url))
+            arch = filename[filename.rfind("-")+1:filename.rfind(".gz")]
+            content_types.append(dict(filename=filename, url=url, arch=arch))
     return content_types
 
 
-def get_contents_file_urls(arch=None, mirror_url=None, include_udeb=False) -> list:
+def get_contents_file_urls(arch, mirror_url=None, include_udeb=False) -> list:
     """Gets the URL(s) of the debian content index file for the given architecture
     If the architecture is None it returns all the content indices.
     """
@@ -52,9 +52,9 @@ def get_contents_file_urls(arch=None, mirror_url=None, include_udeb=False) -> li
     for file in contents_file_list:
         url = file["url"]
         filename = file["filename"]
-        file_arch = filename[filename.rfind("-")+1:filename.rfind(".gz")]
+        file_arch = file["arch"]
         is_udeb = filename.endswith(f"udeb-{file_arch}.gz")
-        if (arch is None) or (arch == file_arch):
+        if (arch == file_arch):
             if is_udeb:
                 if include_udeb:
                     urls.append(url)
@@ -138,8 +138,8 @@ def main(
     if len(content_indices_urls) == 0:
         # if the architecture didn't retrieve anything, output an error,
         # with a list of architectures
-        content_indices_urls = get_contents_file_urls()
-        found_architectures = [item["arch"] for item in content_indices_urls]
+        content_indices = get_content_files_list(mirror_url)
+        found_architectures = [item["arch"] for item in content_indices]
         found_architectures = ", ".join(found_architectures)
         # raise a custom exception
         raise ContentIndexForArchitectureNotFound(
