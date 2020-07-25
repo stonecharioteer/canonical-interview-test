@@ -28,7 +28,6 @@ def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/di
     html = raw_html.decode()
 
     content_types = []
-    # TODO: change and get the href instead using xmltree
     for line in html.split("\r\n"):
         if line.startswith("<a href=\"Contents-"):
             filename = line[line.find("Contents-"):line.find(".gz")+3]
@@ -76,8 +75,6 @@ def download_contents_file(content_file_url, output_dir=None, reuse_if_exists=Fa
     output_file = pathlib.Path(output_dir) / file_name
     if output_file.exists():
         if reuse_if_exists:
-            # TODO: implement a form of check where the filesize becomes a parameter of
-            # interest.
             return output_file
 
     # download the file given the url
