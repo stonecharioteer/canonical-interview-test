@@ -5,6 +5,7 @@ import argparse
 import gzip
 import os
 import urllib.request
+import pathlib
 
 
 def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/dists/stable/main/") -> list:
@@ -29,7 +30,7 @@ def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/di
     for line in html.split("\r\n"):
         if line.startswith("<a href=\"Contents-"):
             filename = line[line.find("Contents-"):line.find(".gz")+3]
-            url = f"{mirror_url}/{filename}"
+            url = f"{mirror_url}{filename}" if mirror_url.endswith("/") else f"{mirror_url}/{filename}"
             arch = filename[filename.find("-"):filename.rfind(".gz")-1]
             content_types.append(dict(filename=filename, url=url))
     return content_types
@@ -57,10 +58,37 @@ def get_contents_file_urls(arch, mirror_url=None, include_udeb=False) -> list:
     return urls
 
 
-def download_contents_file(content_file_url, output_dir=None):
+def download_contents_file(content_file_url, output_dir=None, overwrite=True) -> str:
     """This function takes a Debian contents index and extracts the file to a given folder"""
     if output_dir is None:
         output_dir = os.getcwd()
+    basename = os.path.basename(content_file_url)
+    file_name = os.path.splitext(basename)[0]
+
+    # gz file path
+    output_gz_file = pathlib.Path(output_dir) / basename
+    # extracted contents index file path
+    output_file = pathlib.Path(output_dir) / file_name
+    if output_file.exists():
+        if not overwrite:
+            # TODO: implement a form of check where the filesize becomes a parameter of
+            # interest.
+            return output_file
+
+    # download the file given the url
+    with urllib.request.urlopen(content_file_url) as response:
+        data = response.read()
+    with open(output_gz_file, "wb") as buffer:
+        buffer.write(data)
+
+    # FIXME: use urllib.request.urlopen to do this.
+    with gzip.open(output_gz_file, "rb") as buffer:
+        data = buffer.read()
+    with open(output_file, "wb") as buffer:
+        buffer.write(data)
+
+    return output_file
+
 
 
 def main(mirror_url, arch, count, include_udeb, sort_increasing):
