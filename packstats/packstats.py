@@ -140,6 +140,7 @@ def main(
         # with a list of architectures
         content_indices = get_content_files_list(mirror_url)
         found_architectures = [item["arch"] for item in content_indices]
+        found_architectures = sorted(set(found_architectures))
         found_architectures = ", ".join(found_architectures)
         # raise a custom exception
         raise ContentIndexForArchitectureNotFound(
