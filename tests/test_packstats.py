@@ -3,7 +3,7 @@ import tempfile
 import pathlib
 
 
-class TestPackTest(unittest.TestCase):
+class TestPackStats(unittest.TestCase):
     """This test case tests the entirety of packstats"""
 
     def setUp(self) -> None:
@@ -44,6 +44,11 @@ class TestPackTest(unittest.TestCase):
             f"{self.architecture}.gz"), "output url should end with the `architecture`.gz")
         self.assertFalse(
             "udeb" in urls[0], "url should not contain the udeb link when it is not requested")
+
+    def test_get_content_index_file_url_with_udeb(self):
+        """the application can get the content index file url for both the base arch
+        contents file as well as the udeb file"""
+        from packstats.packstats import get_contents_file_urls
         urls = get_contents_file_urls(
             arch=self.architecture, include_udeb=True)
         self.assertIsInstance(
