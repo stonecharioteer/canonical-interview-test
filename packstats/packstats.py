@@ -90,6 +90,27 @@ def download_contents_file(content_file_url, output_dir=None, overwrite=True) ->
     return output_file
 
 
+def parse_contents_index(contents_index_file):
+    """Parses a given contents index file and returns a dictionary with the package names and their associated files"""
+    with open(contents_index_file) as buffer:
+        data = buffer.read()
+
+    lines = data.split("\n")
+    package_dict = {}
+    for line in lines:
+        if line.strip() == "":
+            # skip empty lines
+            continue
+        else:
+            file_name, packages = line[:line.rfind(
+                    " ")].strip(), line[line.rfind(" "):].strip()
+            packages = packages.split(",")
+            for package in packages:
+                if package_dict.get(package) is None:
+                    package_dict[package] = [file_name]
+                else:
+                    package_dict[package].append(file_name)
+    return package_dict
 
 def main(mirror_url, arch, count, include_udeb, sort_increasing):
 
@@ -129,9 +150,10 @@ def main(mirror_url, arch, count, include_udeb, sort_increasing):
                 packages = packages.split(",")
                 for package in packages:
                     if file_data_dict[file].get(package) is None:
-                        file_data_dict[file][package] = [file_name]
+                        file_data_dict[file][package] = [file_name] if filename != "EMPTY_PACKAGE" else []
                     else:
-                        file_data_dict[file][package].append(file_name)
+                        if file_name != "EMPTY_PACKAGE":
+                            file_data_dict[file][package].append(file_name)
 
 
 def cli_main():
