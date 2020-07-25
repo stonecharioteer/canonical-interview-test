@@ -9,6 +9,7 @@ import pathlib
 
 from packstats.exceptions import ContentIndexForArchitectureNotFound
 
+
 def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/dists/stable/main/") -> list:
     """Returns a list of content files as defined
     by Debian docs here
@@ -111,15 +112,16 @@ def parse_contents_index(contents_index_file):
             packages = packages.split(",")
             for package in packages:
                 if package_dict.get(package) is None:
-                    package_dict[package] = [file_name] if file_name != "EMPTY_PACKAGE" else []
+                    package_dict[package] = [
+                        file_name] if file_name != "EMPTY_PACKAGE" else []
                 else:
                     package_dict[package].append(file_name)
     return package_dict
 
 
 def main(
-    mirror_url, arch, count, include_udeb, sort_increasing,
-    output_dir, reuse_if_exists, cleanup=False):
+        mirror_url, arch, count, include_udeb, sort_increasing,
+        output_dir, reuse_if_exists, cleanup=False):
     """This is the function that orchestrates the entirety of this application.
 
     1. It gets a list of all content indices from a mirror url
@@ -146,7 +148,8 @@ def main(
     # prepare to summarize the data
     complete_package_data = {}
     for url in content_indices_urls:
-        content_index_file = download_contents_file(url, output_dir=output_dir, reuse_if_exists=reuse_if_exists)
+        content_index_file = download_contents_file(
+            url, output_dir=output_dir, reuse_if_exists=reuse_if_exists)
         package_data = parse_contents_index(content_index_file)
         complete_package_data.update(**package_data)
 
@@ -165,7 +168,7 @@ def main(
             print(f"No.\t{'Package Name':<50}\tFile Count")
         print(f"{ix+1}.\t{package:<50}\t{len(complete_package_data[package])}")
         if ix+1 == count:
-            break # use this instead of slicing the reversed list because this way, the overhead of converting a giant iterator to a list is avoided. Some milliseconds may be saved.
+            break  # use this instead of slicing the reversed list because this way, the overhead of converting a giant iterator to a list is avoided. Some milliseconds may be saved.
 
 
 def cli_main():
@@ -191,8 +194,9 @@ def cli_main():
         "-u", "--include-udeb",
         help="include udeb file for the given architecture. DEFAULT False",
         action="store_true")
-    parser.add_argument("-c", "--count", type=int, default=10,
-                        help="number of packages to list. DEFAULT 10")
+    parser.add_argument(
+        "-c", "--count", type=int, default=10,
+        help="number of packages to list. Use -1 to list all. DEFAULT 10")
     parser.add_argument(
         "-i", "--sort-increasing", action="store_true",
         help="Sort package stats list by increasing number of files. DEFAULT False")
