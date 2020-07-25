@@ -151,6 +151,7 @@ def main(
     for url in content_indices_urls:
         content_index_file = download_contents_file(
             url, output_dir=output_dir, reuse_if_exists=reuse_if_exists)
+        print(content_index_file)
         package_data = parse_contents_index(content_index_file)
         complete_package_data.update(**package_data)
 
@@ -166,8 +167,8 @@ def main(
 
     for ix, package in enumerate(package_list):
         if ix == 0:
-            print(f"No.\t{'Package Name':<50}\tFile Count")
-        print(f"{ix+1}.\t{package:<50}\t{len(complete_package_data[package])}")
+            print(f"{'No.':<10}\t{'Package Name':<50}\tFile Count")
+        print(f"{ix+1:<10}\t{package:<50}\t{len(complete_package_data[package])}")
         if ix+1 == count:
             break  # use this instead of slicing the reversed list because this way, the overhead of converting a giant iterator to a list is avoided. Some milliseconds may be saved.
 
