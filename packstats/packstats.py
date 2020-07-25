@@ -7,7 +7,7 @@ import os
 import urllib.request
 
 
-def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/dists/stable/main/"):
+def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/dists/stable/main/") -> list:
     """Returns a list of content files as defined
     by Debian docs here
     Args:
@@ -30,16 +30,37 @@ def get_content_files_list(mirror_url: str = "http://ftp.uk.debian.org/debian/di
         if line.startswith("<a href=\"Contents-"):
             filename = line[line.find("Contents-"):line.find(".gz")+3]
             url = f"{mirror_url}/{filename}"
+            arch = filename[filename.find("-"):filename.rfind(".gz")-1]
             content_types.append(dict(filename=filename, url=url))
     return content_types
 
 
-def cli_command():
-    """Argparse based command line interface"""
+def get_contents_file_urls(arch, mirror_url=None, include_udeb=False) -> list:
+    """Gets the URL(s) of the debian content index file for the given architecture"""
+    if mirror_url is not None:
+        contents_file_list = get_content_files_list(mirror_url)
+    else:
+        contents_file_list = get_content_files_list()
+    # filter for the content file that was requested.
+    urls = []
+    for file in contents_file_list:
+        url = file["url"]
+        filename = file["filename"]
+        file_arch = filename[filename.rfind("-")+1:filename.rfind(".gz")]
+        is_udeb = filename.endswith(f"udeb-{file_arch}.gz")
+        if arch == file_arch:
+            if is_udeb:
+                if include_udeb:
+                    urls.append(url)
+            else:
+                urls.append(url)
+    return urls
 
 
-def parse_contents_file(url, redownload=False):
-    """Parses the contents file and returns the number of files in each package"""
+def download_contents_file(content_file_url, output_dir=None):
+    """This function takes a Debian contents index and extracts the file to a given folder"""
+    if output_dir is None:
+        output_dir = os.getcwd()
 
 
 def main(mirror_url, arch, count, include_udeb, sort_increasing):
