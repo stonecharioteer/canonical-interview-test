@@ -99,12 +99,13 @@ def parse_contents_index(contents_index_file):
 
     with open(contents_index_file) as buffer:
         for line in buffer:
-            if line.strip() == "":
+            line = line.strip()
+            if line == "":
                 # skip empty lines
                 continue
             else:
                 file_name, packages = line.rsplit(" ", maxsplit=1)
-                packages = packages.strip().split(",")
+                packages = packages.split(",")
                 for package in packages:
                     if file_name != "EMPTY_PACKAGE":
                         package_dict[package] += 1
