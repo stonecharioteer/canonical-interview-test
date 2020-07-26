@@ -118,7 +118,7 @@ def parse_contents_index(contents_index_file):
 
 def main(
         mirror_url, arch, count, include_udeb, sort_increasing,
-        output_dir, reuse_if_exists, cleanup=False):
+        output_dir, reuse_if_exists):
     """This is the function that orchestrates the entirety of this application.
 
     1. It gets a list of all content indices from a mirror url
