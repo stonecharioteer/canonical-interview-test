@@ -95,22 +95,19 @@ def download_contents_file(content_file_url, output_dir=None, reuse_if_exists=Fa
 
 def parse_contents_index(contents_index_file):
     """Parses a given contents index file and returns a dictionary with the package names and their associated files"""
-    with open(contents_index_file) as buffer:
-        data = buffer.read()
+    package_dict = defaultdict(int)
 
-    lines = data.split("\n")
-    package_dict = defaultdict(list)
-    for line in lines:
-        if line.strip() == "":
-            # skip empty lines
-            continue
-        else:
-            file_name, packages = line[:line.rfind(
-                " ")].strip(), line[line.rfind(" "):].strip()
-            packages = packages.split(",")
-            for package in packages:
-                if file_name != "EMPTY_PACKAGE":
-                    package_dict[package].append(file_name)
+    with open(contents_index_file) as buffer:
+        for line in buffer:
+            if line.strip() == "":
+                # skip empty lines
+                continue
+            else:
+                file_name, packages = line.rsplit(" ", maxsplit=1)
+                packages = packages.strip().split(",")
+                for package in packages:
+                    if file_name != "EMPTY_PACKAGE":
+                        package_dict[package] += 1
     return package_dict
 
 
@@ -134,8 +131,7 @@ def main(
         # if the architecture didn't retrieve anything, output an error,
         # with a list of architectures
         content_indices = get_content_files_list(mirror_url)
-        found_architectures = [item["arch"] for item in content_indices]
-        found_architectures = sorted(set(found_architectures))
+        found_architectures = sorted({item["arch"] for item in content_indices})
         found_architectures = ", ".join(found_architectures)
         # raise a custom exception
         raise ContentIndexForArchitectureNotFound(
@@ -153,10 +149,8 @@ def main(
     package_list = complete_package_data.keys()
     # sort them in the ascending order of the number of packages
     package_list = sorted(
-        package_list, key=lambda x: len(complete_package_data[x]))
+        package_list, key=lambda x: complete_package_data[x], reverse=not sort_increasing)
     # reverse the sorting direction unless the user wants the ascending order
-    if not sort_increasing:
-        package_list = reversed(package_list)
 
     # print the output, only print how many ever the user asks through the count argument
 
