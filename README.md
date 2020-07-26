@@ -220,7 +220,8 @@ This downloads all files in the given directory. In this case: `/tmp`.
 
 ### Reusing Downloaded Files
 
-If you want to preserve your bandwidth while testing this tool, like I did while developing it, try the `-r` flag, which reuses the Contents Index files for the architecture, if it has already been downloaded into the directory.
+If you want to preserve your bandwidth while testing this tool, like I did while developing it,
+try the `-r` flag, which reuses the Contents Index files for the architecture, if it has already been downloaded into the directory.
 
 ```
 $ packstats -r amd64
@@ -247,7 +248,18 @@ packstats.exceptions.ContentIndexForArchitectureNotFound: intel was not found in
 ```
 
 
-## Testing
+## Development and Testing
+
+To understand how `packstats` is implemented, I recommend beginning with `packstats.packstats.cli_main`,
+which builds an `argparse` command line interface.
+
+From there, the arguments are sent to `packstats.packstats.main`. This builds a workflow with the internal
+functions which are self-explanatory if you look at the docstrings.
+
+For the formatting, I always auto-run autopep8 on my code, and then check the score with pylint which
+lints as I type in VS Code.
+
+### Testing
 
 The core functions of `packstats` have tests.
 
