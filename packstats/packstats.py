@@ -6,6 +6,7 @@ import gzip
 import os
 import urllib.request
 import pathlib
+from collections import defaultdict
 
 from packstats.exceptions import ContentIndexForArchitectureNotFound
 
@@ -98,7 +99,7 @@ def parse_contents_index(contents_index_file):
         data = buffer.read()
 
     lines = data.split("\n")
-    package_dict = {}
+    package_dict = defaultdict(list)
     for line in lines:
         if line.strip() == "":
             # skip empty lines
@@ -108,10 +109,7 @@ def parse_contents_index(contents_index_file):
                 " ")].strip(), line[line.rfind(" "):].strip()
             packages = packages.split(",")
             for package in packages:
-                if package_dict.get(package) is None:
-                    package_dict[package] = [
-                        file_name] if file_name != "EMPTY_PACKAGE" else []
-                else:
+                if file_name != "EMPTY_PACKAGE":
                     package_dict[package].append(file_name)
     return package_dict
 
